@@ -1,4 +1,7 @@
 # QUADRATISCH, PRAKTISCH, GRÜN
+#
+# ACHTUNG: Vor dem benutzen muss in Zeile 82 umbedingt gartenX.txt mit dem richtigen Dateinamen z.B. garten0.txt, garten1.txt, ..., garten5.txt ausgetauscht werden! 
+#
 
 import math
 
@@ -76,6 +79,6 @@ def solve_QPG(Höhe, Breite, Interessenten):
 
         return f"Beste Aufteilung ist {nearest_optimale_horizontale_Aufteilungen} horizontale Felder mal {Interessenten/nearest_optimale_horizontale_Aufteilungen} vertikale Felder à {beste_feld_höhe} hoch mal {beste_feld_breite} breit."
 
-filename = 'garten0.txt'
+filename = 'gartenX.txt'
 Interessenten, Höhe, Breite = read_file(filename)
 print(solve_QPG(Höhe, Breite, Interessenten))
