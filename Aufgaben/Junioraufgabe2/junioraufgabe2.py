@@ -9,7 +9,7 @@ def junioraufgabe2(filename):
 
     for index, item in enumerate(array):
         if item not in letter_dict:
-            player1 += 1
+            player1 += 1    
             player2 += 1
 
         if index == player1:
