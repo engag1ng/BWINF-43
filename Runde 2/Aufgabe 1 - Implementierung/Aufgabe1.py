@@ -1,4 +1,10 @@
+import time
+
+start_time = time.time()
+
 import argparse
+import math
+from math import ceil
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse Beispiel Textdatei aus ./beispiele/")
@@ -11,26 +17,123 @@ if __name__ == "__main__":
 directory = "./beispiele/"
 filename = args.beispiel
 
-def is_tree(tree):
-    """Gibt True zurück wenn TREE, eine Liste, ein Baum ist. Ansonsten False."""
-    if type(tree) != list or len(tree) < 1:
-        return False
-    for branch in branches(tree):
-        if not is_tree(branch):
-            return False
-    return True
+### CLASS DEFINITIONS ###
+import heapq
 
-def branches(tree):
-    "Gibt den alle Zweige von TREE zurück."
-    return tree[1:]
+class Node:
+    def __init__(self, value, is_leaf=True):
+        self.value = value
+        self.is_leaf = is_leaf
+        self.children = []
+        self.parent = None
+
+    def __lt__(self, other):
+        return self.value < other.value
+
+class TreeWithHeap:
+    def __init__(self, is_weighted, frequencies= {}):
+        if is_weighted:
+            self.root = Node(0)
+            self.leaf_heap = [(self.root.value, self.root)]# Min-heap of leaf nodes
+        else:
+            self.root = Node(0)
+            self.top_layer = []
+            for item in frequencies.items():
+                self.node = Node(item[1]) 
+                self.top_layer.append(self.node)
+
+    def add_parent(self, children, value):
+        new_parent = Node(value, is_leaf=False)
+        for child in children:
+            # If the child already has a parent, remove it from that parent's children list.
+            if child.parent is not None:
+                child.parent.children.remove(child)
+            child.parent = new_parent
+            new_parent.children.append(child)
+            # Remove the child from top_layer if it is present there.
+            if child in self.top_layer:
+                self.top_layer.remove(child)
+        # Add the new parent to the top_layer.
+        self.top_layer.append(new_parent)
+        return new_parent
+
+    def add_child(self, parent, value):
+        new_node = Node(value)
+        new_node.parent = parent
+        parent.children.append(new_node)
+        return new_node
+
+    def find_n_smallest(self, n):
+        if n <= 0:
+            return []
+
+        return heapq.nsmallest(n, self.top_layer, key=lambda node: node)
+
+    def find_min_leaf(self):
+        if not self.leaf_heap:
+            return None
+        return self.leaf_heap[0][1]
+
+    def transform_and_add_children(self, node, new_values):
+        # Transform the leaf node into an internal node
+        node.is_leaf = False
+        # Remove it from the heap
+        self.leaf_heap = [(val, n) for val, n in self.leaf_heap if n != node]
+        heapq.heapify(self.leaf_heap)
+
+        # Add new children
+        for value in new_values:
+            # New node's value = parent's value + added value
+            new_node_value = node.value + value
+            new_node = Node(new_node_value)
+            node.children.append(new_node)
+            heapq.heappush(self.leaf_heap, (new_node.value, new_node))
+
+    def find_all_paths(self, is_weighted=False):
+        paths = []
+
+        def dfs(node, current_path):
+            if node.is_leaf:
+                if is_weighted:
+                    paths.append((current_path, node.value))
+                else:
+                    if len(current_path) == 0:
+                        current_path = "0"
+                        path_length = 1
+                    else:
+                        path_length = len(current_path)
+                    paths.append((current_path, path_length))
+                return
+
+            for index, child in enumerate(node.children):
+                dfs(child, current_path + str(index_mapping(index)))
+
+        dfs(self.root, "")
+        return paths
+
+    def print_tree(self, nodes=None):
+        def _print_tree(node, prefix="", is_last=True):
+            branch = "└── " if is_last else "├── "
+            print(prefix + branch + str(node.value))
+            prefix += "    " if is_last else "│   "
+            child_count = len(node.children)
+            for i, child in enumerate(node.children):
+                _print_tree(child, prefix, i == child_count - 1)
+
+        if nodes is None:
+            nodes = self.top_layer
+    
+        for node in nodes:
+            print(str(node.value))
+            child_count = len(node.children)
+            for i, child in enumerate(node.children):
+                _print_tree(child, "", i == child_count - 1)
+            print()
+
+
+### GENERAL FUNCTION DEFINITIONS ### 
 
 def read_file():
-    """
-    Liest alle wichtigen Daten aus dem Beispiel aus und gibt diese zurück.
-    N: Integer, Die Anzahl an verschieden Perlen
-    Pearls: Liste, Die Größen der Perlen
-    Message: String, Die zu kodierende Nachricht
-    """
     with open(directory+filename, encoding='utf-8') as file:
         content = file.readlines()
         content = [line.strip() for line in content]
@@ -44,56 +147,26 @@ def read_file():
 
     return n, pearls, message
 
-n, pearls, message = read_file()
-
-def count_frequencies (frequencies={}):
+def count_frequencies(frequencies={}):
     for char in message:
         if char not in frequencies:
             frequencies[char] = 1
         else:
             frequencies[char] += 1
-    my_tree = sorted([[freq, [char]] for char, freq in frequencies.items()], key= lambda x: x[0])
+        
+    return frequencies, len(frequencies)
 
-    return my_tree
-my_tree = count_frequencies()
-print(my_tree)
+def collapse_tree(tree, n): 
+    n_smallest = tree.find_n_smallest(n)
+    if len(n_smallest) == 1:
+        return tree
+    tree.add_parent(n_smallest, sum([node.value for node in n_smallest]))
 
-def collapse_tree(tree, n):
-    """
-    Fusioniert die N Knoten mit dem kleinsten Label Wert in TREE bis ein valider Baum mit nur einem Wurzelknoten ensteht.
-    N: Integer der bestimmt wie viele Knoten auf einmal fusioniert werden.
-    TREE: Ein invalider Baum mit einer Anzahl an Teilbäumen in Form von Listen als Zweigen.
-    """
-    if len(tree) == 1:
-        return tree[0]
-    n_smallest = []
-    for index, node in enumerate(tree):
-        if len(n_smallest) < n:
-            n_smallest.append((index, node[0]))
-        else:
-            n_smallest = sorted(n_smallest, key=lambda x: x[1], reverse=True)
-            if node[0] < n_smallest[0][1]:
-                n_smallest[0] = (index, node[0])
-
-    combined_branch = [tree[item[0]] for item in n_smallest]
-    combined_branch.insert(0, sum([item[0] for item in combined_branch]))
-
-    for item in sorted(n_smallest, key=lambda x: x[0], reverse=True):
-        tree.remove(my_tree[item[0]])
-    tree.insert(min([item[0] for item in n_smallest]), combined_branch)
     collapse_tree(tree, n)
-    return tree[0]
 
-if n > 62: #Es wird maximal mit 62 Perlen kodiert
-    n = 62
-collapsed_tree = collapse_tree(my_tree, n)
-print(f"Collapsed tree:{collapsed_tree}")
+    return tree
 
 def index_mapping(index):
-    """
-    Erlaubt Kodierungen mit bis zu 62 Perlen.
-    Nimmt N, wenn N kleiner 10 -> gibt N, ansonsten gibt zugehörigen ASCII Charakter von 10 = A bis 62 = z.
-    """
     if index < 10:
         return index
     elif index >= 10 and index <= 36:
@@ -103,44 +176,68 @@ def index_mapping(index):
     else:
         raise ValueError("Wie kann das sein?")
 
-def find_paths(tree, path="", checked=False):
-    """
-    Findet den Pfad zu allen Blättern mit Hilfe von Rekursion. Der Pfad wird als String durch die Indeces in jedem Teilbaum angegeben.
-    """
-    paths = {}
+def assign_codes(paths, frequencies, total_characters):
+    paths = sorted(paths, key=lambda x: x[1])[:total_characters]
+    frequencies = sorted(frequencies.items(), key=lambda x: x[1], reverse=True)
 
-    # Check for single character
-    if checked == False and len(tree[1]) == 1:
-        leaf_value = tree[1][0]
-        paths[leaf_value] = "00"
-        return paths
-    
-    checked = True
+    codes = {}
+    for i in range(len(frequencies)):
+        codes[frequencies[i][0]] = paths[i]
 
-    # Check if the current node is a leaf
-    if isinstance(tree, list) and len(tree) == 1 and isinstance(tree[0], str):
-        leaf_value = tree[0]
-        paths[leaf_value] = path
-        return paths
+    return codes
 
-    # If the node is not a leaf, iterate over its children
-    else:
-        for index, subtree in enumerate(tree[1:]):
-            subtree_paths = find_paths(subtree, path + str(index_mapping(index)), checked)
-            paths.update(subtree_paths)
-
-    return paths
-
-codes = find_paths(collapsed_tree)
-for letter in codes:
-    codes[letter] = codes[letter][:-1] # Because of the nesting of the tree every path gets an unncessary '0' at the end
-
-def encode_message(encoded = ""):
+def encode_message(codes):
+    encoded = ""
+    encoded_length = 0
     for char in message:
-        encoded += codes[char]
+        encoded += codes[char][0]
+        encoded_length += codes[char][1]
     with open("./ausgaben/"+filename+".out", "w", encoding='utf-8') as file:
-        file.write(str(codes)+"\n"+f"Kodierte Textlänge {len(encoded)}")
+        file.write(str(codes)+"\n"+f"Kodierte Textlänge: {encoded_length}")
     print(codes)
-    print(f"Kodierte Textlänge {len(encoded)}")
+    print(f"Kodierte Textlänge: {encoded_length}")
 
-encode_message()
+### IMPLEMENTATION ###
+def n_ary_huffman(n):
+    frequencies, total_characters = count_frequencies()
+
+    tree = TreeWithHeap(False, frequencies)
+    
+    collapse_tree(tree, n)
+
+    tree.root = tree.top_layer[0]
+
+    paths = tree.find_all_paths()
+    
+    codes = assign_codes(paths, frequencies, total_characters)
+
+    encode_message(codes)
+
+def weighted_huffman(n, pearls, message):
+    frequencies, total_characters = count_frequencies()
+    needed_expansions = (total_characters-1)/(n-1)
+    
+    tree = TreeWithHeap(True)
+
+    for i in range(math.ceil(needed_expansions)):
+        min_leaf_node = tree.find_min_leaf()
+        tree.transform_and_add_children(min_leaf_node, pearls)
+
+    paths = tree.find_all_paths(True)
+
+    codes = assign_codes(paths, frequencies, total_characters)
+
+    encode_message(codes)
+
+### CHECK WHICH CONDITION APPLIES ###
+n, pearls, message = read_file()
+n_not_1 = len([x for x in pearls if x != 1])
+if n > 62: #Es wird maximal mit 62 Perlen kodiert
+        n = 62
+if n_not_1 == 0:
+    n_ary_huffman(n)
+else:
+    weighted_huffman(n, pearls, message)
+
+end_time = time.time()
+print(f"Runtime: {(end_time - start_time)*1000} milli seconds")
