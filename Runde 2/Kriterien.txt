@@ -1,0 +1,10 @@
+Dokumentation sehr unverständlich oder nicht vollständig
+Gewinnkriterium nicht erkennbar
+Modellierung ungeeignet
+Lösungsverfahren fehlerhaft
+Ergebnisse schlecht nachvollziehbar
+Beispiele fehlerhaft bzw. zu wenige oder ungeeignete Beispiele
+Unzureichend begründet
+Erfüllt icht die Anforderungen
+Implementierung unnötig aufwendig / ineffizient
+Insgesamt unzureichend
