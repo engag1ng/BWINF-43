@@ -1,6 +1,6 @@
 # BWINF-43
  Repo containing all my solutions for [BWINF 43](https://bwinf.de/bundeswettbewerb/43/).
- All solutions are written in [Python](https://www.python.org/).Documentation and I/O files are included.
+ All solutions are written in [Python](https://www.python.org/). Documentation and I/O files are included.
 
  ⭐Please star this repository!
  
