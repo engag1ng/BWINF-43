@@ -6,13 +6,16 @@
  
 ---
 
- For Round 1:
- - Junioraufgabe 1: Quadratisch, praktisch, grün
- - Junioraufgabe 2: Texthopsen
- - Aufgabe 1: Hopsitexte
- - Aufgabe 2: Schwierigkeiten
- - Aufgabe 3: Wandertag
+ ## Round 1:
+ - Junioraufgabe 1: Quadratisch, praktisch, grün - 4/5pts.
+ - Junioraufgabe 2: Texthopsen - 4/5pts.
+ - Aufgabe 1: Hopsitexte - 5/5pts.
+ - Aufgabe 2: Schwierigkeiten - 4/5pts.
+ - Aufgabe 3: Wandertag - 4/5pts.
 
- For Round 2:
+ ## Round 2:
 - Aufgabe 1: Schmucknachrichten
 - Aufgabe 3: Konfetti
+
+## Round 3:
+**Not yet qualified**
