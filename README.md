@@ -1,6 +1,8 @@
 # BWINF-43
  Repo containing all my solutions for [BWINF 43](https://bwinf.de/bundeswettbewerb/43/).
- All solutions are written in [Python](https://www.python.org/), and include the documentation, input files and python scripts.
+ All solutions are written in [Python](https://www.python.org/).Documentation and I/O files are included.
+
+ ⭐Please star this repository!
  
 ---
 
@@ -12,4 +14,5 @@
  - Aufgabe 3: Wandertag
 
  For Round 2:
- not qualified yet
+- Aufgabe 1: Schmucknachrichten
+- Aufgabe 3: Konfetti
