@@ -14,8 +14,8 @@
  - Aufgabe 3: Wandertag - 4/5pts.
 
  ## Round 2:
-- Aufgabe 1: Schmucknachrichten
-- Aufgabe 3: Konfetti
+- Aufgabe 1: Schmucknachrichten - 11/20pts.
+- Aufgabe 3: Konfetti - 8/20pts.
 
 ## Round 3:
-**Not yet qualified**
+**Not qualified**
